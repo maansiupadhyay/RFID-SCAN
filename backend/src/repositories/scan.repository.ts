@@ -69,15 +69,14 @@ export class ScanRepository {
   }
 
   async findAll(params: { skip?: number; take?: number; orderBy?: any }) {
-    const limit = params.take ?? 100;
-    const offset = params.skip ?? 0;
-    const [rows] = await pool.execute<RowDataPacket[]>(
+    const lim = Math.min(500, Math.max(1, Math.floor(Number(params.take)) || 100));
+    const off = Math.max(0, Math.floor(Number(params.skip)) || 0);
+    const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT s.*, u.name AS user_name, u.email AS user_email
        FROM inventory_scans s
        INNER JOIN users u ON s.user_id = u.id
        ORDER BY s.created_at DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
+       LIMIT ${lim} OFFSET ${off}`
     );
     return rows.map((row) => this.mapScanRow(row, true));
   }

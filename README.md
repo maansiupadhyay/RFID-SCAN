@@ -22,16 +22,16 @@ A full-stack enterprise-level RFID inventory platform designed for industrial en
 ## ⚙️ Setup Instructions
 
 ### 1. Database Setup
-1. Ensure you have a MySQL server running.
-2. Create a database named `rfid_tracking`.
-3. Update the `DATABASE_URL` in `backend/.env`.
+1. Ensure MySQL is running.
+2. In `backend/.env`, set `DATABASE_URL` (must include the database name at the end), e.g. `mysql://USER:PASSWORD@127.0.0.1:3306/rfid_tracking`. You **do not** need to create the database manually — the next step does it.
 
 ### 2. Backend Configuration
-1. Navigate to `backend/` directory.
+1. Navigate to the `backend/` directory.
 2. Run `npm install` to install dependencies.
-3. Apply the schema: `mysql -u root -p rfid_tracking < backend/db/schema.sql` (or run the SQL in your client).
-4. Run `npm run db:seed` to populate sample data.
-5. Start the server with `npm run dev`.
+3. Run **`npm run db:seed`** — this creates the database from `DATABASE_URL` if needed, applies `db/schema.sql`, and loads sample data.
+4. Start the server with `npm run dev`.
+
+*(Optional)* To apply only the SQL schema by hand instead: create the database, then `mysql -u root -p rfid_tracking < backend/db/schema.sql`.
 
 **Backend .env Template:**
 ```env

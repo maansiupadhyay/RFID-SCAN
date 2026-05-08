@@ -2,13 +2,25 @@ import pool from '../config/db';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { CreateToolDTO, UpdateToolDTO } from '../dtos/tool.dto';
 
+function safeLimitTake(take: number | undefined, max = 500): number {
+  const n = Math.floor(Number(take));
+  if (!Number.isFinite(n) || n < 1) return 10;
+  return Math.min(max, n);
+}
+
+function safeSkip(skip: number | undefined): number {
+  const n = Math.floor(Number(skip));
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return n;
+}
+
 export class ToolRepository {
   async findAll(params: { skip?: number; take?: number; where?: any; orderBy?: any }) {
-    const limit = params.take || 10;
-    const offset = params.skip || 0;
-    const [rows] = await pool.execute<RowDataPacket[]>(
-      'SELECT * FROM tools ORDER BY created_at DESC LIMIT ? OFFSET ?',
-      [limit, offset]
+    const limit = safeLimitTake(params.take);
+    const offset = safeSkip(params.skip);
+    // LIMIT/OFFSET as prepared params often triggers ER_WRONG_ARGUMENTS / mysqld_stmt_execute on MySQL 8 + mysql2
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT * FROM tools ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
     );
     return rows.map((t) => this.mapTool(t));
   }

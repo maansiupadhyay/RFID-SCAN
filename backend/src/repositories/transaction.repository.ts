@@ -77,11 +77,10 @@ export class TransactionRepository {
   }
 
   async findAll(params: { skip?: number; take?: number; where?: any; orderBy?: any }) {
-    const limit = params.take ?? 1000;
-    const offset = params.skip ?? 0;
-    const [rows] = await pool.execute<RowDataPacket[]>(
-      `${transactionSelect} ORDER BY t.created_at DESC LIMIT ? OFFSET ?`,
-      [limit, offset]
+    const lim = Math.min(5000, Math.max(1, Math.floor(Number(params.take)) || 1000));
+    const off = Math.max(0, Math.floor(Number(params.skip)) || 0);
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `${transactionSelect} ORDER BY t.created_at DESC LIMIT ${lim} OFFSET ${off}`
     );
     return rows.map(mapTransactionRow);
   }

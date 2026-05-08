@@ -1,11 +1,48 @@
-import '../src/config/env';
 import pool from '../src/config/db';
 import bcrypt from 'bcryptjs';
+import mysql from 'mysql2/promise';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import type { ResultSetHeader } from 'mysql2';
+import { env } from '../src/config/env';
+
+function parseMysqlUrl(urlString: string) {
+  const u = new URL(urlString);
+  const database = u.pathname.replace(/^\//, '').split('?')[0];
+  return {
+    host: u.hostname,
+    port: Number(u.port || 3306),
+    user: decodeURIComponent(u.username),
+    password: decodeURIComponent(u.password || ''),
+    database,
+  };
+}
+
+/** Create database from DATABASE_URL if missing, then apply db/schema.sql (idempotent). */
+async function ensureDatabaseReady(): Promise<void> {
+  const cfg = parseMysqlUrl(env.DATABASE_URL);
+  if (!cfg.database) {
+    throw new Error('DATABASE_URL must include a database name (e.g. .../rfid_tracking)');
+  }
+
+  const { database, ...serverOnly } = cfg;
+  const root = await mysql.createConnection({ ...serverOnly, multipleStatements: true });
+  await root.query(
+    `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
+  );
+  await root.end();
+
+  const conn = await mysql.createConnection({ ...cfg, multipleStatements: true });
+  const schemaPath = join(__dirname, '..', 'db', 'schema.sql');
+  const schemaSql = readFileSync(schemaPath, 'utf8');
+  await conn.query(schemaSql);
+  await conn.end();
+}
 
 async function main() {
   console.log('🌱 Seeding database...');
 
+  await ensureDatabaseReady();
   await pool.execute('DELETE FROM refresh_tokens');
   await pool.execute('DELETE FROM inventory_scans');
   await pool.execute('DELETE FROM transactions');

@@ -7,7 +7,8 @@ import {
   Chrome, AlertCircle, User, KeyRound, Eye, EyeOff, CheckCircle2
 } from 'lucide-react';
 
-const BACKEND_URL = 'http://localhost:5001';
+const BACKEND_URL = 'https://rfid-scan-psjd.onrender.com';
+console.log(BACKEND_URL);
 
 const LoginPage = () => {
   const [searchParams] = useSearchParams();
