@@ -5,8 +5,10 @@
 const PRODUCTION_BACKEND_ORIGIN = 'https://rfid-scan-psjd.onrender.com';
 
 const raw = (import.meta.env.VITE_API_BASE_URL || '').trim();
+// Prefer !DEV over PROD: PROD is false when `vite build --mode <non-production>`,
+// which would incorrectly keep relative `/api` and break Netlify deploys.
 const resolved =
-  raw || (import.meta.env.PROD ? PRODUCTION_BACKEND_ORIGIN : '');
+  raw || (import.meta.env.DEV ? '' : PRODUCTION_BACKEND_ORIGIN);
 
 export const BACKEND_ORIGIN = resolved.replace(/\/$/, '');
 
