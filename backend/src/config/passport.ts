@@ -3,6 +3,17 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { env } from './env';
 import userRepository from '../repositories/user.repository';
 
+type DbUser = NonNullable<Awaited<ReturnType<typeof userRepository.findById>>>;
+
+function toSessionUser(user: DbUser): Express.User {
+  return {
+    ...user,
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+  } as Express.User;
+}
+
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCK_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 
@@ -45,11 +56,15 @@ export const configurePassport = () => {
             }
           }
 
+          if (!user) {
+            return done(new Error('Failed to resolve user after OAuth'), false);
+          }
+
           if (!user.isActive) {
             return done(new Error('Account is deactivated'), false);
           }
 
-          return done(null, user);
+          return done(null, toSessionUser(user));
         } catch (error) {
           return done(error as Error, false);
         }
@@ -57,11 +72,15 @@ export const configurePassport = () => {
     )
   );
 
-  passport.serializeUser((user: any, done) => done(null, user.id));
+  passport.serializeUser((user: Express.User, done) => done(null, user.id));
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await userRepository.findById(id);
-      done(null, user);
+      if (!user) {
+        done(null, false);
+        return;
+      }
+      done(null, toSessionUser(user));
     } catch (err) {
       done(err, null);
     }

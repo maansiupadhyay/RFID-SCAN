@@ -1,0 +1,66 @@
+-- RFID backend schema (MySQL 8+). Apply once: mysql ... < db/schema.sql
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(191) NOT NULL,
+  email VARCHAR(191) NOT NULL UNIQUE,
+  password VARCHAR(191) NULL,
+  role VARCHAR(191) NOT NULL DEFAULT 'OPERATOR',
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  oauth_provider VARCHAR(191) NULL,
+  oauth_id VARCHAR(191) NULL,
+  failed_login_attempts INT NOT NULL DEFAULT 0,
+  locked_until DATETIME(3) NULL,
+  reset_token VARCHAR(191) NULL,
+  reset_token_expires DATETIME(3) NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  INDEX idx_oauth (oauth_provider, oauth_id)
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  token VARCHAR(500) NOT NULL UNIQUE,
+  user_id INT NOT NULL,
+  expires_at DATETIME(3) NOT NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  CONSTRAINT fk_refresh_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tools (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  tool_code VARCHAR(191) NOT NULL UNIQUE,
+  name VARCHAR(191) NOT NULL,
+  category VARCHAR(191) NOT NULL,
+  location VARCHAR(191) NULL,
+  status VARCHAR(191) NOT NULL DEFAULT 'AVAILABLE',
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  tool_id INT NOT NULL,
+  user_id INT NOT NULL,
+  type VARCHAR(191) NOT NULL,
+  issued_to VARCHAR(191) NULL,
+  remarks TEXT NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  CONSTRAINT fk_tx_tool FOREIGN KEY (tool_id) REFERENCES tools (id) ON DELETE CASCADE,
+  CONSTRAINT fk_tx_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS inventory_scans (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  scanned_ids TEXT NOT NULL,
+  matched_tools TEXT NOT NULL,
+  missing_tools TEXT NOT NULL,
+  extra_tools TEXT NOT NULL,
+  total_scanned INT NOT NULL,
+  total_matched INT NOT NULL,
+  total_missing INT NOT NULL,
+  total_extra INT NOT NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  CONSTRAINT fk_scan_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);

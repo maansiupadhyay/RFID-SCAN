@@ -4,19 +4,13 @@
   "description": "RFID Tool Tracking & Inventory Management System - Backend",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
+    "dev": "node ./node_modules/ts-node-dev/lib/bin.js --respawn --transpile-only src/server.ts",
+    "build": "node ./node_modules/typescript/lib/tsc.js",
     "start": "node dist/server.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "ts-node prisma/seed.ts",
-    "prisma:studio": "prisma studio"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "db:seed": "node ./node_modules/ts-node/dist/bin.js scripts/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "mysql2": "^3.14.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/express-session": "^1.19.0",
     "@types/passport": "^1.0.17",
@@ -39,7 +33,6 @@
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.9.0",
-    "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.6.3"
