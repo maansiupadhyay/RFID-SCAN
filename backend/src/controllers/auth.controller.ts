@@ -100,9 +100,7 @@ export class AuthController {
   });
 
   deactivateUser = asyncHandler(async (req: Request, res: Response) => {
-    const raw = req.params.id;
-    const id = parseInt(Array.isArray(raw) ? raw[0] : raw, 10);
-    await authService.deactivateUser(id);
+    await authService.deactivateUser(parseInt(req.params.id));
     return ApiResponse.success(res, 'User deactivated');
   });
 

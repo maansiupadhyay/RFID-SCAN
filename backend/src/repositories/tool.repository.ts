@@ -1,32 +1,28 @@
-import pool from '../config/db';
-import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import prisma from '../config/prisma';
 import { CreateToolDTO, UpdateToolDTO } from '../dtos/tool.dto';
 
 export class ToolRepository {
   async findAll(params: { skip?: number; take?: number; where?: any; orderBy?: any }) {
     const limit = params.take || 10;
     const offset = params.skip || 0;
-    const [rows] = await pool.execute<RowDataPacket[]>(
-      'SELECT * FROM tools ORDER BY created_at DESC LIMIT ? OFFSET ?',
-      [limit, offset]
-    );
-    return rows.map((t) => this.mapTool(t));
+    const result: any[] = await prisma.$queryRaw`SELECT * FROM tools ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+    return result.map(t => this.mapTool(t));
   }
 
   async count(where?: any) {
-    let query = 'SELECT COUNT(*) AS count FROM tools';
-    const sqlParams: any[] = [];
-
+    let query = 'SELECT COUNT(*) as count FROM tools';
+    const params: any[] = [];
+    
     if (where && where.status) {
       query += ' WHERE status = ?';
-      sqlParams.push(where.status);
+      params.push(where.status);
     }
-
-    const [rows] = await pool.execute<RowDataPacket[]>(query, sqlParams);
-    return Number(rows[0].count);
+    
+    const result: any[] = await prisma.$queryRawUnsafe(query, ...params);
+    return Number(result[0].count);
   }
 
-  private mapTool(tool: RowDataPacket | undefined) {
+  private mapTool(tool: any) {
     if (!tool) return null;
     return {
       id: Number(tool.id),
@@ -36,73 +32,49 @@ export class ToolRepository {
       location: tool.location,
       status: tool.status,
       createdAt: tool.created_at,
-      updatedAt: tool.updated_at,
+      updatedAt: tool.updated_at
     };
   }
 
   async findById(id: number) {
-    const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM tools WHERE id = ?', [id]);
-    return this.mapTool(rows[0]);
+    const result: any[] = await prisma.$queryRaw`SELECT * FROM tools WHERE id = ${id}`;
+    return this.mapTool(result[0]);
   }
 
   async findByCode(toolCode: string) {
-    const [rows] = await pool.execute<RowDataPacket[]>(
-      'SELECT * FROM tools WHERE tool_code = ?',
-      [toolCode]
-    );
-    return this.mapTool(rows[0]);
+    const result: any[] = await prisma.$queryRaw`SELECT * FROM tools WHERE tool_code = ${toolCode}`;
+    return this.mapTool(result[0]);
   }
 
   async create(data: CreateToolDTO) {
     const loc = data.location || null;
-    await pool.execute(
-      `INSERT INTO tools (tool_code, name, category, location, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, 'AVAILABLE', NOW(3), NOW(3))`,
-      [data.toolCode, data.name, data.category, loc]
-    );
+    await prisma.$executeRaw`INSERT INTO tools (tool_code, name, category, location, status, created_at, updated_at) VALUES (${data.toolCode}, ${data.name}, ${data.category}, ${loc}, 'AVAILABLE', NOW(3), NOW(3))`;
     return this.findByCode(data.toolCode);
   }
 
   async update(id: number, data: UpdateToolDTO) {
-    const name = data.name !== undefined ? data.name || null : null;
-    const cat = data.category !== undefined ? data.category || null : null;
-    const loc = data.location !== undefined ? data.location || null : null;
-    const status = data.status !== undefined ? data.status : null;
-
-    await pool.execute(
-      `UPDATE tools SET name = COALESCE(?, name), category = COALESCE(?, category),
-       location = COALESCE(?, location), status = COALESCE(?, status), updated_at = NOW(3) WHERE id = ?`,
-      [name, cat, loc, status, id]
-    );
+    const name = data.name || null;
+    const cat = data.category || null;
+    const loc = data.location || null;
+    const status = data.status || null;
+    
+    await prisma.$executeRaw`UPDATE tools SET name = COALESCE(${name}, name), category = COALESCE(${cat}, category), location = COALESCE(${loc}, location), status = COALESCE(${status}, status), updated_at = NOW(3) WHERE id = ${id}`;
     return this.findById(id);
   }
 
   async delete(id: number) {
-    await pool.execute<ResultSetHeader>('DELETE FROM tools WHERE id = ?', [id]);
+    return prisma.$executeRaw`DELETE FROM tools WHERE id = ${id}`;
   }
 
   async updateStatusBulk(codes: string[], status: string) {
     if (codes.length === 0) return;
     const placeholders = codes.map(() => '?').join(',');
-    await pool.execute(
-      `UPDATE tools SET status = ?, updated_at = NOW(3) WHERE tool_code IN (${placeholders})`,
-      [status, ...codes]
-    );
-  }
-
-  async markMissingIfCurrentlyAvailable(codes: string[]) {
-    if (codes.length === 0) return;
-    const placeholders = codes.map(() => '?').join(',');
-    await pool.execute(
-      `UPDATE tools SET status = 'MISSING', updated_at = NOW(3)
-       WHERE status = 'AVAILABLE' AND tool_code IN (${placeholders})`,
-      codes
-    );
+    return prisma.$executeRawUnsafe(`UPDATE tools SET status = ?, updated_at = NOW(3) WHERE tool_code IN (${placeholders})`, status, ...codes);
   }
 
   async getAllCodes() {
-    const [rows] = await pool.execute<RowDataPacket[]>('SELECT tool_code FROM tools');
-    return rows.map((t) => t.tool_code as string);
+    const result: any[] = await prisma.$queryRawUnsafe('SELECT tool_code FROM tools');
+    return result.map((t) => t.tool_code);
   }
 }
 

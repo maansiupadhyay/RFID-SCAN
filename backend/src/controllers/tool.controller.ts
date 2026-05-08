@@ -16,8 +16,7 @@ export class ToolController {
   });
 
   getToolById = asyncHandler(async (req: Request, res: Response) => {
-    const raw = req.params.id;
-    const id = parseInt(Array.isArray(raw) ? raw[0] : raw, 10);
+    const id = parseInt(req.params.id);
     const result = await toolService.getToolById(id);
     return ApiResponse.success(res, MESSAGES.TOOL.FETCHED, result);
   });
@@ -28,15 +27,13 @@ export class ToolController {
   });
 
   updateTool = asyncHandler(async (req: Request, res: Response) => {
-    const raw = req.params.id;
-    const id = parseInt(Array.isArray(raw) ? raw[0] : raw, 10);
+    const id = parseInt(req.params.id);
     const result = await toolService.updateTool(id, req.body);
     return ApiResponse.success(res, MESSAGES.TOOL.UPDATED, result);
   });
 
   deleteTool = asyncHandler(async (req: Request, res: Response) => {
-    const raw = req.params.id;
-    const id = parseInt(Array.isArray(raw) ? raw[0] : raw, 10);
+    const id = parseInt(req.params.id);
     await toolService.deleteTool(id);
     return ApiResponse.success(res, MESSAGES.TOOL.DELETED);
   });

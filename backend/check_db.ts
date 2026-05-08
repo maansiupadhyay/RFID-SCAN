@@ -1,16 +1,14 @@
-import './src/config/env';
-import pool from './src/config/db';
-import type { RowDataPacket } from 'mysql2';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 async function check() {
-  const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM tools LIMIT 1');
-  if (rows && rows.length > 0) {
-    console.log('KEYS:', Object.keys(rows[0]));
-    console.log('SAMPLE:', rows[0]);
+  const result: any = await prisma.$queryRaw`SELECT * FROM tools LIMIT 1`;
+  if (result && result.length > 0) {
+    console.log('KEYS:', Object.keys(result[0]));
+    console.log('SAMPLE:', result[0]);
   } else {
     console.log('No tools found');
   }
-  await pool.end();
   process.exit(0);
 }
 

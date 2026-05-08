@@ -5,14 +5,14 @@ A full-stack enterprise-level RFID inventory platform designed for industrial en
 ## 🚀 Key Features
 - **Modern Enterprise UI:** Clean, technology-focused design built with React.
 - **RFID Scan Simulator:** Compare batch scanned IDs against database inventory to identify missing or extra tools.
-- **Modular Backend:** Node.js/Express with TypeScript and direct MySQL access (`mysql2`).
+- **Scalable Backend:** Modular Node.js/Express architecture using TypeScript and Prisma ORM.
 - **Secure Authentication:** JWT-based auth with role-based access control (Admin/Operator).
 - **Analytics Dashboard:** Real-time visibility into inventory health and recent activities.
 - **Normalized MySQL Schema:** Efficient data management with Transactions and Scan History logs.
 
 ## 🛠️ Technology Stack
 - **Frontend:** React, Vite, Framer Motion, Lucide Icons, Recharts, Axios.
-- **Backend:** Node.js, Express, TypeScript, MySQL (`mysql2`).
+- **Backend:** Node.js, Express, TypeScript, Prisma ORM.
 - **Database:** MySQL.
 - **Validation:** Zod.
 - **Security:** bcryptjs, JSON Web Tokens.
@@ -29,8 +29,8 @@ A full-stack enterprise-level RFID inventory platform designed for industrial en
 ### 2. Backend Configuration
 1. Navigate to `backend/` directory.
 2. Run `npm install` to install dependencies.
-3. Apply the schema: `mysql -u root -p rfid_tracking < backend/db/schema.sql` (or run the SQL in your client).
-4. Run `npm run db:seed` to populate sample data.
+3. Run `npx prisma migrate dev --name init` to create tables.
+4. Run `npm run prisma:seed` to populate the database with sample data.
 5. Start the server with `npm run dev`.
 
 **Backend .env Template:**

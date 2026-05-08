@@ -1,1 +1,0 @@
-{"version":3,"file":"transaction.dto.d.ts","sourceRoot":"","sources":["../../src/dtos/transaction.dto.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,YAAY;IAC3B,QAAQ,EAAE,MAAM,CAAC;IACjB,QAAQ,EAAE,MAAM,CAAC;IACjB,OAAO,CAAC,EAAE,MAAM,CAAC;CAClB;AAED,MAAM,WAAW,aAAa;IAC5B,QAAQ,EAAE,MAAM,CAAC;IACjB,OAAO,CAAC,EAAE,MAAM,CAAC;CAClB"}

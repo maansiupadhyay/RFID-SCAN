@@ -7,7 +7,7 @@ import {
   Chrome, AlertCircle, User, KeyRound, Eye, EyeOff, CheckCircle2
 } from 'lucide-react';
 
-const BACKEND_URL = 'http://localhost:5001';
+const BACKEND_URL = 'http://localhost:5000';
 
 const LoginPage = () => {
   const [searchParams] = useSearchParams();
