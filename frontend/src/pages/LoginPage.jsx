@@ -6,9 +6,7 @@ import {
   Mail, Lock, ArrowRight, Loader2, ScanLine, ShieldCheck,
   Chrome, AlertCircle, User, KeyRound, Eye, EyeOff, CheckCircle2
 } from 'lucide-react';
-
-const BACKEND_URL = 'https://rfid-scan-psjd.onrender.com';
-console.log(BACKEND_URL);
+import { API_ROOT } from '../config/apiBase';
 
 const LoginPage = () => {
   const [searchParams] = useSearchParams();
@@ -36,7 +34,7 @@ const LoginPage = () => {
     if (err === 'oauth_not_configured') setError('Google OAuth is not configured on this server.');
     if (expired === 'true') setError('Your session expired. Please login again.');
 
-    fetch(`${BACKEND_URL}/api/auth/oauth-status`)
+    fetch(`${API_ROOT}/auth/oauth-status`)
       .then(r => r.json())
       .then(d => setGoogleConfigured(d?.data?.googleConfigured === true))
       .catch(() => setGoogleConfigured(false));
@@ -70,7 +68,7 @@ const LoginPage = () => {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
+      const res = await fetch(`${API_ROOT}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -91,7 +89,7 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true); clearMessages();
     try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
+      const res = await fetch(`${API_ROOT}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: forgotForm.email }),
@@ -119,7 +117,7 @@ const LoginPage = () => {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/reset-password`, {
+      const res = await fetch(`${API_ROOT}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: resetForm.token, newPassword: resetForm.newPassword }),
@@ -138,7 +136,7 @@ const LoginPage = () => {
       setError('Google OAuth is not configured. Set GOOGLE_CLIENT_ID in backend .env to enable.');
       return;
     }
-    window.location.href = `${BACKEND_URL}/api/auth/google`;
+    window.location.href = `${API_ROOT}/auth/google`;
   };
 
   const switchTab = (t) => { setTab(t); clearMessages(); setResetToken(''); };

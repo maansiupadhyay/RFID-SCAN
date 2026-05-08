@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_ROOT } from '../config/apiBase';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_ROOT,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true, // Send cookies (refresh token) with requests
 });
@@ -52,7 +53,7 @@ api.interceptors.response.use(
 
       try {
         // Use refresh token cookie to get a new access token
-        const response = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+        const response = await axios.post(`${API_ROOT}/auth/refresh`, {}, { withCredentials: true });
         const { accessToken } = response.data.data;
         sessionStorage.setItem('rfid_access_token', accessToken);
         processQueue(null, accessToken);
