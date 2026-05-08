@@ -2,8 +2,9 @@ import { TokenPayload } from '../utils/tokenUtils';
 
 declare global {
   namespace Express {
-    interface Request {
-      user?: TokenPayload;
+    interface User extends TokenPayload {
+      id?: number;
+      name?: string;
     }
   }
 }

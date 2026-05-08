@@ -1,7 +1,6 @@
 import scanRepository from '../repositories/scan.repository';
 import toolRepository from '../repositories/tool.repository';
 import { ScanInputDTO } from '../dtos/scan.dto';
-import prisma from '../config/prisma';
 
 export class ScanService {
   async performScan(userId: number, data: ScanInputDTO) {
@@ -20,13 +19,7 @@ export class ScanService {
     // Update status to MISSING only for tools that WERE available but were NOT scanned
     // This avoids marking "ISSUED" tools as "MISSING" if they are just out in the field
     if (missingTools.length > 0) {
-      await prisma.tool.updateMany({
-        where: { 
-          toolCode: { in: missingTools },
-          status: 'AVAILABLE' // Only mark available tools as missing
-        },
-        data: { status: 'MISSING' },
-      });
+      await toolRepository.markMissingIfCurrentlyAvailable(missingTools);
     }
 
     const result = {

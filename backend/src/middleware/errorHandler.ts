@@ -5,14 +5,9 @@ import { MESSAGES } from '../constants/messages';
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction): void => {
   console.error('Error:', err);
 
-  // Prisma known errors
-  if (err.code === 'P2002') {
+  // MySQL duplicate key
+  if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
     ApiResponse.conflict(res, 'A record with this unique field already exists');
-    return;
-  }
-
-  if (err.code === 'P2025') {
-    ApiResponse.notFound(res, 'Record not found');
     return;
   }
 
