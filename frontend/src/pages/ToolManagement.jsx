@@ -77,11 +77,7 @@ const ToolManagement = () => {
     try {
       // Use direct api call with full assurance
       await api.delete(`/tools/${id}`);
-      
-      // Force a slightly longer delay and then a hard refresh to be 100% sure
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
+      setTimeout(() => fetchTools(), 100);
       
     } catch (err) {
       console.error('Delete failed:', err);
